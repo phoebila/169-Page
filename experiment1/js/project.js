@@ -1,34 +1,77 @@
-// project.js - purpose and description here
-// Author: Your Name
-// Date:
+// project.js - Experiment 2 (Vector Art, Animation, and Interactivity)
+// Author: Phoebe Royer
+// Date: 1/14/25
 
-// NOTE: This is how we might start a basic JavaaScript OOP project
-
-// Constants - User-servicable parts
-// In a longer project I like to put these in a separate file
-
-// define a class
-class MyProjectClass {
-  // constructor function
-  constructor(param1, param2) {
-    // set properties using 'this' keyword
-    this.property1 = param1;
-    this.property2 = param2;
+// Define a class for animated vector shapes
+class AnimatedShape {
+  constructor(x, y, size, color) {
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.color = color;
+    this.xSpeed = random(-2, 2);
+    this.ySpeed = random(-2, 2);
   }
-  
-  // define a method
-  myMethod() {
-    // code to run when method is called
+
+  // Update the position of the shape
+  update() {
+    this.x += this.xSpeed;
+    this.y += this.ySpeed;
+
+    // Bounce off edges of the canvas
+    if (this.x > width || this.x < 0) this.xSpeed *= -1;
+    if (this.y > height || this.y < 0) this.ySpeed *= -1;
+  }
+
+  // Draw the shape on the canvas
+  display() {
+    noStroke();
+    fill(this.color);
+    ellipse(this.x, this.y, this.size);
+  }
+
+  // Change color on mouse click
+  changeColor(newColor) {
+    this.color = newColor;
   }
 }
 
-function main() {
-  // create an instance of the class
-  let myInstance = new MyProjectClass("value1", "value2");
+let shapes = [];  // Array to hold multiple shapes
 
-  // call a method on the instance
-  myInstance.myMethod();
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  noCursor();
+
+  // Create initial shapes
+  for (let i = 0; i < 10; i++) {
+    shapes.push(new AnimatedShape(random(width), random(height), random(20, 50), color(random(255), random(255), random(255))));
+  }
 }
 
-// let's get this party started - uncomment me
-//main();
+function draw() {
+  background(0, 20);  // Transparent background effect for fading trails
+
+  // Update and display all shapes
+  for (let shape of shapes) {
+    shape.update();
+    shape.display();
+  }
+
+  // Draw a vector line following the mouse position
+  stroke(0, 255, 0);
+  line(width / 2, height / 2, mouseX, mouseY);
+}
+
+function mousePressed() {
+  // Change color of all shapes on mouse press
+  for (let shape of shapes) {
+    shape.changeColor(color(random(255), random(255), random(255)));
+  }
+
+  // Add a new shape at the mouse position
+  shapes.push(new AnimatedShape(mouseX, mouseY, random(20, 50), color(random(255), random(255), random(255))));
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}

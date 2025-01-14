@@ -1,79 +1,94 @@
-// sketch.js - purpose and description here
-// Author: Your Name
-// Date:
+// Experiment 2 (Vector Art, Animation, and Interactivity)
+// Author: Phoebe Royer
+// Date: 1/14/25
 
-// Here is how you might set up an OOP p5.js project
-// Note that p5.js looks for a file called sketch.js
-
-// Constants - User-servicable parts
-// In a longer project I like to put these in a separate file
-const VALUE1 = 1;
-const VALUE2 = 2;
+// Constants - User-configurable settings
+const RECT_SIZE = 250;
+const TEXT_SIZE = 140;
 
 // Globals
-let myInstance;
 let canvasContainer;
-var centerHorz, centerVert;
+let centerHorz, centerVert;
+let rotatingShapes = [];  // Store rotating elements for interactivity
 
-class MyClass {
-    constructor(param1, param2) {
-        this.property1 = param1;
-        this.property2 = param2;
-    }
+class RotatingShape {
+  constructor(x, y, size, color) {
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.color = color;
+    this.angle = 0;
+  }
 
-    myMethod() {
-        // code to run when method is called
-    }
+  update() {
+    this.angle += 0.01;
+  }
+
+  display() {
+    push();
+    translate(this.x, this.y);
+    rotate(this.angle);
+    fill(this.color);
+    noStroke();
+    rect(-this.size / 2, -this.size / 2, this.size, this.size);
+    pop();
+  }
 }
 
-function resizeScreen() {
-  centerHorz = canvasContainer.width() / 2; // Adjusted for drawing logic
-  centerVert = canvasContainer.height() / 2; // Adjusted for drawing logic
-  console.log("Resizing...");
-  resizeCanvas(canvasContainer.width(), canvasContainer.height());
-  // redrawCanvas(); // Redraw everything based on new size
-}
-
-// setup() function is called once when the program starts
 function setup() {
-  // place our canvas, making it fit our container
+  // Place the canvas and make it fit the container
   canvasContainer = $("#canvas-container");
   let canvas = createCanvas(canvasContainer.width(), canvasContainer.height());
   canvas.parent("canvas-container");
-  // resize canvas is the page is resized
 
-  // create an instance of the class
-  myInstance = new MyClass("VALUE1", "VALUE2");
+  // Initial positions for rotation center
+  updateCenter();
 
-  $(window).resize(function() {
-    resizeScreen();
-  });
-  resizeScreen();
+  // Handle resizing dynamically
+  $(window).resize(resizeScreen);
 }
 
-// draw() function is called repeatedly, it's the main animation loop
 function draw() {
-  background(220);    
-  // call a method on the instance
-  myInstance.myMethod();
+  background(20);  // Dark background for a clean aesthetic
 
-  // Set up rotation for the rectangle
-  push(); // Save the current drawing context
-  translate(centerHorz, centerVert); // Move the origin to the rectangle's center
-  rotate(frameCount / 100.0); // Rotate by frameCount to animate the rotation
+  // Draw dynamic rotating rectangles
+  for (let shape of rotatingShapes) {
+    shape.update();
+    shape.display();
+  }
+
+  // Draw the primary rotating rectangle in the center
+  drawCentralRotatingRectangle();
+
+  // Draw dynamic text centered on the canvas
+  fill(0, 255, 0);
+  textSize(TEXT_SIZE);
+  textStyle(BOLD);
+  textAlign(CENTER, CENTER);
+  text("p5*", centerHorz, centerVert);
+}
+
+function drawCentralRotatingRectangle() {
+  push();
+  translate(centerHorz, centerVert);
+  rotate(frameCount / 100.0); // Continuous rotation
   fill(234, 31, 81);
   noStroke();
-  rect(-125, -125, 250, 250); // Draw the rectangle centered on the new origin
-  pop(); // Restore the original drawing context
-
-  // The text is not affected by the translate and rotate
-  fill(255);
-  textStyle(BOLD);
-  textSize(140);
-  text("p5*", centerHorz - 105, centerVert + 40);
+  rect(-RECT_SIZE / 2, -RECT_SIZE / 2, RECT_SIZE, RECT_SIZE);
+  pop();
 }
 
-// mousePressed() function is called once after every time a mouse button is pressed
 function mousePressed() {
-    // code to run when mouse is pressed
+  // Add a new randomly placed rotating shape on mouse press
+  rotatingShapes.push(new RotatingShape(random(width), random(height), random(50, 150), color(random(255), random(255), random(255))));
+}
+
+function resizeScreen() {
+  resizeCanvas(canvasContainer.width(), canvasContainer.height());
+  updateCenter();
+}
+
+function updateCenter() {
+  centerHorz = canvasContainer.width() / 2;
+  centerVert = canvasContainer.height() / 2;
 }
