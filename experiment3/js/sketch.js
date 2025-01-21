@@ -2,6 +2,8 @@
 // Author: Your Name
 // Date:
 
+// use this as a jumping off point future me: https://openprocessing.org/sketch/2272173
+
 // Here is how you might set up an OOP p5.js project
 // Note that p5.js looks for a file called sketch.js
 
