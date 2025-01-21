@@ -1,6 +1,6 @@
 // sketch.js - Enhanced Generative Design with Mouse Interaction
-// Author: Your Name
-// Date:
+// Author: Phoebe Royer
+// Date: 1/21/25
 
 // Constants
 const NODE_COUNT = 200; // Number of nodes
