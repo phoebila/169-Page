@@ -1,6 +1,6 @@
-// project.js - purpose and description here
-// Author: Your Name
-// Date:
+// project.js - experiment 3 generative design
+// Author: Phoebe Royer
+// Date: 1/21/25
 
 // NOTE: This is how we might start a basic JavaaScript OOP project
 
