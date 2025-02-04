@@ -5,8 +5,6 @@ let terrain = [];
 let sandFlow = [];
 let particles = [];  // List to store interactive particles
 
-let wind = createVector(0.02, 0); // Wind force to push particles horizontally
-
 function setup() {
   let canvas = createCanvas(800, 600, WEBGL);
   canvas.parent('canvas-container');
@@ -36,9 +34,18 @@ function draw() {
   // Update and display particles (user interaction)
   updateParticles();
 
-  // Draw terrain with some undulation for extra effect
-  drawTerrain();
-
+  // Draw terrain
+  for (let y = 0; y < rows - 1; y++) {
+    beginShape(TRIANGLE_STRIP);
+    for (let x = 0; x < cols; x++) {
+      let h = terrain[y][x];
+      stroke(100, 80, 50);
+      fill(230 - h * 0.5, 200 - h * 0.3, 150 - h * 0.2); // Height-based shading
+      vertex(x * scl, y * scl, h);
+      vertex(x * scl, (y + 1) * scl, terrain[y + 1][x]);
+    }
+    endShape();
+  }
 }
 
 // Sand diffusion for a natural dune effect
@@ -64,7 +71,6 @@ function updateParticles() {
   for (let i = particles.length - 1; i >= 0; i--) {
     let p = particles[i];
     p.applyForce(createVector(0, 0.1)); // Gravity force
-    p.applyForce(wind); // Apply wind force
 
     p.update();
 
@@ -105,7 +111,6 @@ class Particle {
     this.pos = createVector(x, y, terrain[floor(y / scl)][floor(x / scl)]); // Initial position based on terrain height
     this.vel = createVector(random(-1, 1), random(-1, 1), random(-1, 1));
     this.acc = createVector(0, 0, 0);
-    this.size = random(3, 6); // Random size for variety
   }
 
   applyForce(force) {
@@ -127,28 +132,13 @@ class Particle {
     let yIndex = floor(this.pos.y / scl);
     if (xIndex >= 0 && xIndex < cols && yIndex >= 0 && yIndex < rows) {
       let h = terrain[yIndex][xIndex]; // Get terrain height at particle position
-      let sandColor = color(230 - h * 0.5 + random(-10, 10), 200 - h * 0.3 + random(-10, 10), 150 - h * 0.2 + random(-10, 10)); // Add random color variation for variety
+      let sandColor = color(230 - h * 0.5, 200 - h * 0.3, 150 - h * 0.2); // Use same color logic as terrain
       fill(sandColor);
     }
 
     translate(this.pos.x, this.pos.y, this.pos.z);
-    sphere(this.size);  // Use random size for each particle for variation
+    sphere(5);
     pop();
-  }
-}
-
-// Draw terrain with some undulation for extra effect
-function drawTerrain() {
-  for (let y = 0; y < rows - 1; y++) {
-    beginShape(TRIANGLE_STRIP);
-    for (let x = 0; x < cols; x++) {
-      let h = terrain[y][x] + sin(frameCount * 0.05 + x * 0.1) * 3; // Undulate the terrain
-      stroke(100, 80, 50);
-      fill(230 - h * 0.5, 200 - h * 0.3, 150 - h * 0.2); // Height-based shading
-      vertex(x * scl, y * scl, h);
-      vertex(x * scl, (y + 1) * scl, terrain[y + 1][x] + sin(frameCount * 0.05 + (x + y) * 0.1) * 3); // Add slight undulation
-    }
-    endShape();
   }
 }
 
