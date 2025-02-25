@@ -2,7 +2,7 @@
 <html>
 <head>
 	<!-- This title is used for tabs and bookmarks -->
-	<title>Experiment 7: Data Visualization & Networks</title>
+	<title>Experiment 8: Machine Learning</title>
 
 	<!-- Use UTF character set, a good idea with any webpage -->
 	<meta charset="UTF-8" />
@@ -32,7 +32,7 @@
 	<main id="content">
 		<section>
 
-			<h1>Experiment 7: Data Visualization & Networks</h1>
+			<h1>Experiment 8: Machine Learning</h1>
 
 			<div class="minor-section">
 				<div id="canvas-container">
@@ -45,12 +45,15 @@
 
 			<div class="minor-section">
 				<h2>Description</h2>
-				<p>The Mood Weaving Scarf is an interactive, generative artwork in p5.js that visualizes emotional states over time. Each day, users input their mood by selecting a button, which adds a new woven stripe to the digital scarf. The scarf grows over time, reflecting the user’s emotional history through color and pattern.</p>
+				<p>This simulates a robotic arm inspired by Can't Help Myself by Sun Yuan and Peng Yu. The arm consists of three segments, each controlled by sliders in manual mode or by predefined preset movements (wave, grab, drop) in auto mode. Additionally, the arm leaves behind a blood-like fluid effect, mimicking the piece’s expressive and chaotic motions.</p>
 			</div>
 
 			<div class="minor-section">
 				<h2>Technical</h2>
-				<p> This piece as mood input button that's stored in local storage and has a clear cache button to clear input. Theres a dictionary for the colors, a generative scarf algorithm and a pattern effect. </p>
+				<p> Arm Mechanics: The arm is constructed using lines and angles, with each segment rotating based on slider inputs or preset logic. Trigonometric functions (cos and sin) determine segment positions.
+					Modes: The simulation supports manual mode (controlled by sliders) and auto mode, where predefined animations run based on time (millis()).
+					Fluid Simulation: A particle system generates red fluid-like dots at the arm's endpoint, decreasing in opacity over time for a fading effect.
+					UI Elements: Sliders control joint angles, and buttons toggle between modes and preset actions.</p>
 			</div>
 
 			<div class="minor-section">

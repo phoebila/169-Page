@@ -1,140 +1,73 @@
-let moods = [];
-let colors = {
-  "happy": ["#FFD700", "#FFA500", "#FF69B4"],
-  "sad": ["#4682B4", "#5F9EA0", "#6A5ACD"],
-  "angry": ["#B22222", "#8B0000", "#000000"],
-  "calm": ["#8FBC8F", "#556B2F", "#DEB887"]
-};
-
-let customMoods = {}; // Store custom moods
-let animationProgress = 1.0; // Controls the stripe expansion animation
-let isAnimating = false; // Tracks if an animation is in progress
+let armSegments = [100, 80, 60]; // Lengths of arm segments
+let angles;
+let sliders = [];
+let mode = 'manual'; // 'manual' or 'auto'
+let particles = []; // Blood-like fluid particles
+let presetIndex = 0;
+let presets = ['wave', 'grab', 'drop'];
 
 function setup() {
-  let canvas = createCanvas(400, 800);
+  let canvas = createCanvas(600, 600);
   canvas.parent('canvas-container');
-
-  // Make the canvas background transparent
-  clear();
-
-  let savedMoods = localStorage.getItem("moodHistory");
-  if (savedMoods) {
-    moods = JSON.parse(savedMoods);
+  angles = [PI / 4, PI / 4, PI / 4]; // Initialize angles inside setup
+  
+  for (let i = 0; i < angles.length; i++) {
+    sliders.push(createSlider(0, PI, angles[i], 0.01));
+    sliders[i].position(550, 600 + i * 30);
   }
-
-  createMoodButtons();
-  createCustomMoodInputs();
-
-  let clearButton = createButton("Clear scarf");
-  clearButton.position(550, 820 + 5 * 30);
-  clearButton.mousePressed(clearScarf);
-
-  drawScarf();
+  let modeButton = createButton('Toggle Mode');
+  modeButton.position(550, 700);
+  modeButton.mousePressed(() => mode = mode === 'manual' ? 'auto' : 'manual');
+  
+  let presetButton = createButton('Next Preset');
+  presetButton.position(650, 700);
+  presetButton.mousePressed(() => presetIndex = (presetIndex + 1) % presets.length);
 }
 
 function draw() {
-  if (isAnimating) {
-    animationProgress += 0.05; // Controls the speed of animation
-    if (animationProgress >= 1.0) {
-      animationProgress = 1.0;
-      isAnimating = false;
-      noLoop(); // Stop animation when done
-    }
-    drawScarf();
-  }
-}
-
-function drawScarf() {
-  clear(); // Use clear() for transparent background
-  let stripeHeight = (height / max(moods.length, 1)) * animationProgress;
-
-  for (let i = 0; i < moods.length; i++) {
-    let mood = moods[i];
-    let moodColors = colors[mood] || customMoods[mood]; // Use custom mood if it exists
-    
-    // Check if moodColors exists and is an array
-    if (!Array.isArray(moodColors) || moodColors.length !== 3) {
-      console.error(`Invalid mood colors for ${mood}`, moodColors);
-      continue; // Skip this mood if colors are invalid
-    }
-
-    for (let j = 0; j < width; j += 20) {
-      let waveOffset = sin(TWO_PI * (j / width) + frameCount * 0.05) * 10; // Wave distortion effect
-
-      // Gradient transition between colors
-      let col1 = moodColors[0];
-      let col2 = moodColors[1];
-      let col3 = moodColors[2];
-
-      let lerpedCol = lerpColor(color(col1), color(col2), map(j, 0, width, 0, 1));  // Gradient between first two colors
-      let lerpedCol2 = lerpColor(color(col2), color(col3), map(j, 0, width, 0, 1)); // Gradient between the second two colors
-
-      // Apply wave distortion and gradient fade
-      fill(lerpedCol);
-      rect(j, i * stripeHeight + waveOffset, 20, stripeHeight);
-      
-      fill(lerpedCol2);
-      rect(j, i * stripeHeight + waveOffset + 5, 20, stripeHeight);
-    }
-  }
-}
-
-
-function createMoodButtons() {
-  let moodNames = Object.keys(colors);
-  for (let i = 0; i < moodNames.length; i++) {
-    let btn = createButton(moodNames[i]);
-    btn.position(550, 820 + i * 30);
-    btn.mousePressed(() => addMood(moodNames[i]));
-  }
-}
-
-function createCustomMoodInputs() {
-  let moodInput = createInput();
-  moodInput.position(550, 720);
-
-  let colorPickersDiv = createDiv();
-  colorPickersDiv.position(550, 750);
-
-  let colorPicker1 = createColorPicker('#000000');
-  colorPicker1.parent(colorPickersDiv);
+  background(240);
+  translate(width / 2, height / 2);
   
-  let colorPicker2 = createColorPicker('#FFFFFF');
-  colorPicker2.parent(colorPickersDiv);
-
-  let colorPicker3 = createColorPicker('#FF0000');
-  colorPicker3.parent(colorPickersDiv);
-
-  let addCustomMoodButton = createButton("Add Custom Mood");
-  addCustomMoodButton.position(550, 790);
-  addCustomMoodButton.mousePressed(() => addCustomMood(moodInput.value(), colorPicker1.value(), colorPicker2.value(), colorPicker3.value()));
+  if (mode === 'auto') executePreset(presets[presetIndex]);
+  else for (let i = 0; i < sliders.length; i++) angles[i] = sliders[i].value();
+  
+  drawArm();
+  updateParticles();
+  drawParticles();
 }
 
-function addMood(newMood) {
-  if (colors[newMood]) {
-    moods.push(newMood);
-    localStorage.setItem("moodHistory", JSON.stringify(moods));
-
-    animationProgress = 0.0; // Reset animation progress
-    isAnimating = true;
-    loop(); // Start animation
+function drawArm() {
+  let x = 0, y = 0;
+  stroke(0);
+  strokeWeight(10);
+  noFill();
+  
+  for (let i = 0; i < armSegments.length; i++) {
+    let newX = x + cos(angles[i]) * armSegments[i];
+    let newY = y + sin(angles[i]) * armSegments[i];
+    line(x, y, newX, newY);
+    x = newX;
+    y = newY;
   }
+  particles.push({ x, y, lifetime: 255 });
 }
 
-function addCustomMood(moodName, color1, color2, color3) {
-  if (moodName && color1 && color2 && color3) {
-    customMoods[moodName] = [color1, color2, color3];
-    moods.push(moodName); // Add custom mood to the list
-    localStorage.setItem("moodHistory", JSON.stringify(moods));
+function executePreset(type) {
+  let t = millis() / 1000;
+  if (type === 'wave') angles[1] = PI / 4 + sin(t * 2) * PI / 8;
+  if (type === 'grab') { angles[1] = PI / 6; angles[2] = PI / 3; }
+  if (type === 'drop') { angles[1] = PI / 2; angles[2] = PI / 6; }
+}
 
-    animationProgress = 0.0; // Reset animation progress
-    isAnimating = true;
-    loop(); // Start animation
+function updateParticles() {
+  for (let p of particles) p.lifetime -= 5;
+  particles = particles.filter(p => p.lifetime > 0);
+}
+
+function drawParticles() {
+  noStroke();
+  for (let p of particles) {
+    fill(200, 0, 0, p.lifetime);
+    ellipse(p.x, p.y, 10);
   }
-}
-
-function clearScarf() {
-  moods = [];
-  localStorage.removeItem("moodHistory");
-  drawScarf();
 }
